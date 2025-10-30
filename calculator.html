@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: hsl(220,6%,10% );
+      padding: 20px;
+    }
+
+    .calculator {
+      background-color: #1e1e1e;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      width: 320px;
+      overflow: hidden;
+      padding: 25px;
+    }
+
+    #display {
+      width: 100%;
+      height: 100px;
+      background-color: #0d0d0d;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 2.8rem;
+      text-align: right;
+      padding: 0 20px;
+      margin-bottom: 25px;
+      outline: none;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7);
+      letter-spacing: 2px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 15px;
+    }
+
+    button {
+      height: 65px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+      color: white;
+    }
+
+    button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .ac {
+      background-color: #ff5252;
+      grid-column: span 2;
+    }
+
+    .del {
+      background-color: #ff9800;
+    }
+
+    .operator {
+      background-color: #2196f3;
+    }
+
+    .number {
+      background-color: #424242;
+    }
+
+    .decimal {
+      background-color: #424242;
+    }
+
+    .zero {
+      background-color: #424242;
+    }
+
+    .equals {
+      background: linear-gradient(to bottom, #4caf50, #2e7d32);
+      grid-column: span 2;
+    }
+
+    @media (max-width: 400px) {
+      .calculator {
+        width: 100%;
+        max-width: 320px;
+      }
+      
+      button {
+        height: 55px;
+        font-size: 1.4rem;
+      }
+      
+      #display {
+        height: 80px;
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <input type="text" id="display" readonly value="0">
+
+    <div class="buttons">
+      <button onclick="clearDisplay()" class="ac">AC</button>
+      <button onclick="deleteLast()" class="del">DEL</button>
+      <button onclick="appendValue('/')" class="operator">÷</button>
+    
+
+      <button onclick="appendValue('7')" class="number">7</button>
+      <button onclick="appendValue('8')" class="number">8</button>
+      <button onclick="appendValue('9')" class="number">9</button>
+        <button onclick="appendValue('*')" class="operator">×</button>
+    
+
+      <button onclick="appendValue('4')" class="number">4</button>
+      <button onclick="appendValue('5')" class="number">5</button>
+      <button onclick="appendValue('6')" class="number">6</button>
+        <button onclick="appendValue('-')" class="operator">−</button>
+      
+
+      <button onclick="appendValue('1')" class="number">1</button>
+      <button onclick="appendValue('2')" class="number">2</button>
+      <button onclick="appendValue('3')" class="number">3</button>
+      <button onclick="appendValue('+')" class="operator">+</button>
+      
+
+      <button onclick="appendValue('.')" class="decimal">.</button>
+      <button onclick="appendValue('0')" class="zero">0</button>
+      <button onclick="calculate()" class="equals">=</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    let currentExpression = '';
+    
+    function appendValue(value) {
+      if (display.value === '0' || display.value === 'Error') {
+        display.value = '';
+      }
+      
+      // Prevent multiple decimal points in a number
+      if (value === '.' && display.value.includes('.') && 
+          !display.value.split(/[\+\-\*\/]/).pop().includes('.')) {
+        return;
+      }
+      
+      // Prevent multiple operators in a row
+      const lastChar = display.value.slice(-1);
+      if (['+', '-', '*', '/'].includes(lastChar) && ['+', '-', '*', '/'].includes(value)) {
+        return;
+      }
+      
+      display.value += value;
+      currentExpression += value;
+    }
+    
+    function clearDisplay() {
+      display.value = '0';
+      currentExpression = '';
+    }
+    
+    function deleteLast() {
+      if (display.value.length > 1) {
+        display.value = display.value.slice(0, -1);
+        currentExpression = currentExpression.slice(0, -1);
+      } else {
+        display.value = '0';
+        currentExpression = '';
+      }
+    }
+    
+    function calculate() {
+      try {
+        // Replace ÷ with / and × with * for evaluation
+        let expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
+        
+        // Evaluate the expression
+        let result = eval(expression);
+        
+        // If result is a decimal, limit to 10 decimal places
+        if (Number.isFinite(result)) {
+          display.value = parseFloat(result.toFixed(10)).toString();
+          currentExpression = display.value;
+        } else {
+          display.value = 'Error';
+          currentExpression = '';
+        }
+      } catch (error) {
+        display.value = 'Error';
+        currentExpression = '';
+      }
+    }
+    
+    // Add keyboard support
+    document.addEventListener('keydown', function(event) {
+      const key = event.key;
+      
+      if (key >= '0' && key <= '9' || key === '.') {
+        appendValue(key);
+      } else if (key === '+' || key === '-' || key === '*') {
+        appendValue(key);
+      } else if (key === '/') {
+        event.preventDefault(); // Prevent browser search
+        appendValue('/');
+      } else if (key === 'Enter' || key === '=') {
+        calculate();
+      } else if (key === 'Escape' || key === 'Delete') {
+        clearDisplay();
+      } else if (key === 'Backspace') {
+        deleteLast();
+      }
+    });
+  </script>
+</body>
+</html>
